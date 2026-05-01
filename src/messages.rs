@@ -1,4 +1,4 @@
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -67,7 +67,7 @@ pub enum ServerBody {
         game_id: String,
         question_index: u16,
         question_count: u16,
-        question_ends_at: DateTime<Local>,
+        question_ends_at: DateTime<Utc>,
         question: Question,
         players: Vec<Player>,
     },
@@ -107,7 +107,7 @@ pub struct Game {
     pub host_name: String,
     pub topic: String,
     pub question_count: u16,
-    pub created_at: DateTime<Local>,
+    pub created_at: DateTime<Utc>,
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -134,10 +134,10 @@ pub struct Player {
     pub did_answer_correctly: Option<bool>,
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum GamePhase {
-    WaitingForPlayers,
+    WaitingForPlayer,
     QuestionActive,
     AnswerReveal,
     WaitingForNext,
@@ -187,6 +187,8 @@ pub enum ErrorCode {
     GameFull,
     InvalidQuestionCount,
     InvalidGamePhase,
+    InvalidSessionState,
+    InvalidTopic,
     AnswerAlreadyLocked,
     QuestionTimeout,
     NotAGameMember,
@@ -194,3 +196,55 @@ pub enum ErrorCode {
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct EmptyPayload {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn roundtrip_client(json: &str) {
+        let parsed: ClientMessage = serde_json::from_str(json).expect("parse");
+        let back = serde_json::to_string(&parsed).expect("serialize");
+        let reparsed: ClientMessage = serde_json::from_str(&back).expect("reparse");
+        let _ = reparsed;
+    }
+
+    fn roundtrip_server(json: &str) {
+        let parsed: ServerMessage = serde_json::from_str(json).expect("parse");
+        let back = serde_json::to_string(&parsed).expect("serialize");
+        let _: ServerMessage = serde_json::from_str(&back).expect("reparse");
+    }
+
+    #[test]
+    fn client_message_roundtrips() {
+        roundtrip_client(r#"{"type":"session.hello","requestId":"r1","payload":{"protocolVersion":1,"clientVersion":"x","resumeToken":null}}"#);
+        roundtrip_client(r#"{"type":"player.identify","requestId":"r2","payload":{"displayName":"Mira"}}"#);
+        roundtrip_client(r#"{"type":"lobby.subscribe","requestId":"r3","payload":{}}"#);
+        roundtrip_client(r#"{"type":"game.create","requestId":"r4","payload":{"topic":"Science","questionCount":5}}"#);
+        roundtrip_client(r#"{"type":"game.join","requestId":"r5","payload":{"gameId":"game_1"}}"#);
+        roundtrip_client(r#"{"type":"answer.submit","requestId":"r6","payload":{"gameId":"game_1","questionId":"q1","answerId":"a"}}"#);
+        roundtrip_client(r#"{"type":"question.next.ready","requestId":"r7","payload":{"gameId":"game_1","questionId":"q1"}}"#);
+        roundtrip_client(r#"{"type":"lobby.return","requestId":"r8","payload":{"gameId":"game_1"}}"#);
+    }
+
+    #[test]
+    fn server_message_roundtrips() {
+        roundtrip_server(r#"{"requestId":"r1","type":"session.ready","payload":{"playerId":"player_1"}}"#);
+        roundtrip_server(r#"{"requestId":null,"type":"lobby.snapshot","payload":{"games":[]}}"#);
+        roundtrip_server(r#"{"requestId":null,"type":"error","payload":{"code":"INVALID_TOPIC","message":"x"}}"#);
+    }
+
+    #[test]
+    fn timestamps_serialize_with_z_suffix() {
+        let now: DateTime<Utc> = Utc::now();
+        let s = serde_json::to_string(&now).unwrap();
+        assert!(s.ends_with("Z\""), "expected Z suffix, got {s}");
+    }
+
+    #[test]
+    fn game_phase_serializes_to_protocol_strings() {
+        let v = serde_json::to_string(&GamePhase::WaitingForPlayer).unwrap();
+        assert_eq!(v, "\"waiting_for_player\"");
+        let v = serde_json::to_string(&GamePhase::QuestionActive).unwrap();
+        assert_eq!(v, "\"question_active\"");
+    }
+}
