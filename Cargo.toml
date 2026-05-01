@@ -1,0 +1,16 @@
+[package]
+name = "cereal"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+toml = "1"
+serde_json = "1"
+chrono = { version = "0.4", features = ["serde"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+tokio-tungstenite = "0.29"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+rand = "0.10"
+futures-util = { version = "0.3", features = ["sink"] }
