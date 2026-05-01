@@ -1,72 +1,64 @@
-use futures_util::{TryStreamExt, future, stream::StreamExt};
-use std::error::Error;
-use tokio::net::{TcpListener, TcpStream};
-use tracing::info;
+use std::path::PathBuf;
+use std::sync::Arc;
+use tokio::net::TcpListener;
+use tracing::{error, info};
+use tracing_subscriber::EnvFilter;
 
+mod connection;
+mod game;
+mod ids;
+mod lobby;
 mod messages;
-use messages::*;
+mod questions;
 
-fn parse() -> Result<(), Box<dyn Error>> {
-    let message = ServerMessage {
-        request_id: Some("request-4".to_string()),
-        body: ServerBody::GameResults {
-            game_id: "game-1".to_string(),
-            players: vec![
-                Player {
-                    id: "player-1".to_string(),
-                    name: "Mirah".to_string(),
-                    score: Some(2),
-                    is_ready_for_next: Some(false),
-                    did_answer_correctly: None,
-                },
-                Player {
-                    id: "player-2".to_string(),
-                    name: "Jonah".to_string(),
-                    score: Some(2),
-                    is_ready_for_next: Some(false),
-                    did_answer_correctly: None,
-                },
-            ],
-            winner_player_id: None,
-            winner_label: "Draw game".to_string(),
-        },
-    };
-    println!("=== JSON ===");
-    println!("{}", serde_json::to_string_pretty(&message)?);
+use connection::handle_connection;
+use lobby::spawn_lobby;
+use questions::QuestionRegistry;
 
-    println!("\n=== TOML ===");
-    println!("{}", toml::to_string_pretty(&message)?);
-
-    Ok(())
-}
+const BIND_ADDR: &str = "127.0.0.1:9002";
+const QUESTIONS_DIR: &str = "questions";
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    tracing_subscriber::fmt::init();
-    let listener = TcpListener::bind(("localhost", 9002)).await?;
-    info!("listening on localhost:9002");
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
+        )
+        .init();
 
-    while let Ok((stream, _)) = listener.accept().await {
-        info!("accepted connection");
-        accept_connection(stream).await;
+    let registry = match QuestionRegistry::load_from_dir(&PathBuf::from(QUESTIONS_DIR)) {
+        Ok(r) => Arc::new(r),
+        Err(e) => {
+            error!("failed to load questions: {e}");
+            return Err(e.into());
+        }
+    };
+
+    let lobby_tx = spawn_lobby(registry);
+    let listener = TcpListener::bind(BIND_ADDR).await?;
+    info!("listening on {BIND_ADDR}");
+
+    loop {
+        tokio::select! {
+            res = listener.accept() => {
+                match res {
+                    Ok((stream, _)) => {
+                        let lobby_tx = lobby_tx.clone();
+                        tokio::spawn(async move {
+                            handle_connection(stream, lobby_tx).await;
+                        });
+                    }
+                    Err(e) => {
+                        error!("accept error: {e}");
+                    }
+                }
+            }
+            _ = tokio::signal::ctrl_c() => {
+                info!("shutting down");
+                break;
+            }
+        }
     }
 
     Ok(())
-}
-
-async fn accept_connection(stream: TcpStream) {
-    let addr = stream.peer_addr().expect("streams have a peer address");
-    info!("peer address = {}", addr);
-
-    let ws_stream = tokio_tungstenite::accept_async(stream)
-        .await
-        .expect("successful websocket handshake");
-
-    info!("new websocket connection: {}", addr);
-
-    let (write, read) = ws_stream.split();
-    read.try_filter(|msg| future::ready(msg.is_text()))
-        .forward(write)
-        .await
-        .expect("messages are forwarded");
 }

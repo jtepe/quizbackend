@@ -1,0 +1,245 @@
+{
+  "topic": "Nerd Stuff",
+  "questions": [
+    {
+      "id": "nerd-1",
+      "topic": "Nerd Stuff",
+      "prompt": "In The Lord of the Rings, what is the Elvish word for 'friend' that opens the Doors of Durin?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Mellon" },
+        { "id": "b", "label": "B", "text": "Mithrandir" },
+        { "id": "c", "label": "C", "text": "Namárië" },
+        { "id": "d", "label": "D", "text": "Elendil" }
+      ],
+      "correctAnswerId": "a"
+    },
+    {
+      "id": "nerd-2",
+      "topic": "Nerd Stuff",
+      "prompt": "What is the name of Han Solo's iconic starship in Star Wars?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Razor Crest" },
+        { "id": "b", "label": "B", "text": "Millennium Falcon" },
+        { "id": "c", "label": "C", "text": "Slave I" },
+        { "id": "d", "label": "D", "text": "Ghost" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "nerd-3",
+      "topic": "Nerd Stuff",
+      "prompt": "Which company developed and released the original Game Boy?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Sega" },
+        { "id": "b", "label": "B", "text": "Atari" },
+        { "id": "c", "label": "C", "text": "Nintendo" },
+        { "id": "d", "label": "D", "text": "Sony" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "nerd-4",
+      "topic": "Nerd Stuff",
+      "prompt": "In The Matrix, which colored pill does Neo choose to take?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Blue" },
+        { "id": "b", "label": "B", "text": "Green" },
+        { "id": "c", "label": "C", "text": "Red" },
+        { "id": "d", "label": "D", "text": "Yellow" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "nerd-5",
+      "topic": "Nerd Stuff",
+      "prompt": "According to The Hitchhiker's Guide to the Galaxy, what is the answer to life, the universe, and everything?",
+      "options": [
+        { "id": "a", "label": "A", "text": "7" },
+        { "id": "b", "label": "B", "text": "42" },
+        { "id": "c", "label": "C", "text": "0" },
+        { "id": "d", "label": "D", "text": "108" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "nerd-6",
+      "topic": "Nerd Stuff",
+      "prompt": "In Marvel comics, which fictional metal is bonded to Wolverine's skeleton?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Vibranium" },
+        { "id": "b", "label": "B", "text": "Adamantium" },
+        { "id": "c", "label": "C", "text": "Mithril" },
+        { "id": "d", "label": "D", "text": "Carbonadium" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "nerd-7",
+      "topic": "Nerd Stuff",
+      "prompt": "What primary type is Pikachu in the Pokémon franchise?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Fire" },
+        { "id": "b", "label": "B", "text": "Water" },
+        { "id": "c", "label": "C", "text": "Electric" },
+        { "id": "d", "label": "D", "text": "Normal" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "nerd-8",
+      "topic": "Nerd Stuff",
+      "prompt": "Who designed and created the C++ programming language?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Dennis Ritchie" },
+        { "id": "b", "label": "B", "text": "Bjarne Stroustrup" },
+        { "id": "c", "label": "C", "text": "James Gosling" },
+        { "id": "d", "label": "D", "text": "Guido van Rossum" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "nerd-9",
+      "topic": "Nerd Stuff",
+      "prompt": "Who is the captain of the USS Enterprise in the original Star Trek series?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Jean-Luc Picard" },
+        { "id": "b", "label": "B", "text": "Benjamin Sisko" },
+        { "id": "c", "label": "C", "text": "Kathryn Janeway" },
+        { "id": "d", "label": "D", "text": "James T. Kirk" }
+      ],
+      "correctAnswerId": "d"
+    },
+    {
+      "id": "nerd-10",
+      "topic": "Nerd Stuff",
+      "prompt": "What does the acronym HTTP stand for?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Hyper Transfer Text Protocol" },
+        { "id": "b", "label": "B", "text": "HyperText Transfer Protocol" },
+        { "id": "c", "label": "C", "text": "High Throughput Transmission Protocol" },
+        { "id": "d", "label": "D", "text": "Host Transfer Tunneling Protocol" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "nerd-11",
+      "topic": "Nerd Stuff",
+      "prompt": "In the Harry Potter series, what is the name of Harry's pet owl?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Errol" },
+        { "id": "b", "label": "B", "text": "Hedwig" },
+        { "id": "c", "label": "C", "text": "Pigwidgeon" },
+        { "id": "d", "label": "D", "text": "Crookshanks" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "nerd-12",
+      "topic": "Nerd Stuff",
+      "prompt": "Which science fiction franchise features the cybernetic collective known as the Borg?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Star Wars" },
+        { "id": "b", "label": "B", "text": "Star Trek" },
+        { "id": "c", "label": "C", "text": "Battlestar Galactica" },
+        { "id": "d", "label": "D", "text": "Mass Effect" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "nerd-13",
+      "topic": "Nerd Stuff",
+      "prompt": "What is the name of the dragon that occupies the Lonely Mountain in The Hobbit?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Glaurung" },
+        { "id": "b", "label": "B", "text": "Smaug" },
+        { "id": "c", "label": "C", "text": "Ancalagon" },
+        { "id": "d", "label": "D", "text": "Scatha" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "nerd-14",
+      "topic": "Nerd Stuff",
+      "prompt": "In Minecraft, what is the name of the boss found in the End dimension?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Wither" },
+        { "id": "b", "label": "B", "text": "Warden" },
+        { "id": "c", "label": "C", "text": "Ender Dragon" },
+        { "id": "d", "label": "D", "text": "Elder Guardian" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "nerd-15",
+      "topic": "Nerd Stuff",
+      "prompt": "Who initially created the Linux kernel?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Richard Stallman" },
+        { "id": "b", "label": "B", "text": "Linus Torvalds" },
+        { "id": "c", "label": "C", "text": "Ken Thompson" },
+        { "id": "d", "label": "D", "text": "Andrew Tanenbaum" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "nerd-16",
+      "topic": "Nerd Stuff",
+      "prompt": "In Frank Herbert's Dune, what is the name of the desert planet at the heart of the story?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Caladan" },
+        { "id": "b", "label": "B", "text": "Giedi Prime" },
+        { "id": "c", "label": "C", "text": "Arrakis" },
+        { "id": "d", "label": "D", "text": "Salusa Secundus" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "nerd-17",
+      "topic": "Nerd Stuff",
+      "prompt": "What is the name of Master Chief's AI companion in the Halo video game series?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Athena" },
+        { "id": "b", "label": "B", "text": "Cortana" },
+        { "id": "c", "label": "C", "text": "EDI" },
+        { "id": "d", "label": "D", "text": "GLaDOS" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "nerd-18",
+      "topic": "Nerd Stuff",
+      "prompt": "In Doctor Who, what is the name of the Doctor's time-travelling spaceship?",
+      "options": [
+        { "id": "a", "label": "A", "text": "TARDIS" },
+        { "id": "b", "label": "B", "text": "Serenity" },
+        { "id": "c", "label": "C", "text": "Heart of Gold" },
+        { "id": "d", "label": "D", "text": "Bebop" }
+      ],
+      "correctAnswerId": "a"
+    },
+    {
+      "id": "nerd-19",
+      "topic": "Nerd Stuff",
+      "prompt": "Which programming language is named after a British comedy troupe?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Ruby" },
+        { "id": "b", "label": "B", "text": "Python" },
+        { "id": "c", "label": "C", "text": "Perl" },
+        { "id": "d", "label": "D", "text": "Lua" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "nerd-20",
+      "topic": "Nerd Stuff",
+      "prompt": "Which video game series features a Hylian hero named Link rescuing Princess Zelda?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Final Fantasy" },
+        { "id": "b", "label": "B", "text": "Chrono Trigger" },
+        { "id": "c", "label": "C", "text": "The Legend of Zelda" },
+        { "id": "d", "label": "D", "text": "Dragon Quest" }
+      ],
+      "correctAnswerId": "c"
+    }
+  ]
+}

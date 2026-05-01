@@ -1,0 +1,245 @@
+{
+  "topic": "Geography",
+  "questions": [
+    {
+      "id": "geography-1",
+      "topic": "Geography",
+      "prompt": "Which country has the largest land area in the world?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Canada" },
+        { "id": "b", "label": "B", "text": "China" },
+        { "id": "c", "label": "C", "text": "Russia" },
+        { "id": "d", "label": "D", "text": "United States" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "geography-2",
+      "topic": "Geography",
+      "prompt": "What is the capital of Australia?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Sydney" },
+        { "id": "b", "label": "B", "text": "Melbourne" },
+        { "id": "c", "label": "C", "text": "Canberra" },
+        { "id": "d", "label": "D", "text": "Perth" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "geography-3",
+      "topic": "Geography",
+      "prompt": "Mount Everest sits on the border between Nepal and which other country?",
+      "options": [
+        { "id": "a", "label": "A", "text": "India" },
+        { "id": "b", "label": "B", "text": "China" },
+        { "id": "c", "label": "C", "text": "Bhutan" },
+        { "id": "d", "label": "D", "text": "Pakistan" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "geography-4",
+      "topic": "Geography",
+      "prompt": "Which is the smallest country in the world by area?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Monaco" },
+        { "id": "b", "label": "B", "text": "Vatican City" },
+        { "id": "c", "label": "C", "text": "San Marino" },
+        { "id": "d", "label": "D", "text": "Liechtenstein" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "geography-5",
+      "topic": "Geography",
+      "prompt": "Which is the largest hot desert on Earth?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Gobi" },
+        { "id": "b", "label": "B", "text": "Kalahari" },
+        { "id": "c", "label": "C", "text": "Sahara" },
+        { "id": "d", "label": "D", "text": "Arabian" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "geography-6",
+      "topic": "Geography",
+      "prompt": "Which is the largest of Earth's oceans?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Atlantic" },
+        { "id": "b", "label": "B", "text": "Indian" },
+        { "id": "c", "label": "C", "text": "Arctic" },
+        { "id": "d", "label": "D", "text": "Pacific" }
+      ],
+      "correctAnswerId": "d"
+    },
+    {
+      "id": "geography-7",
+      "topic": "Geography",
+      "prompt": "What is the capital city of Canada?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Toronto" },
+        { "id": "b", "label": "B", "text": "Vancouver" },
+        { "id": "c", "label": "C", "text": "Montreal" },
+        { "id": "d", "label": "D", "text": "Ottawa" }
+      ],
+      "correctAnswerId": "d"
+    },
+    {
+      "id": "geography-8",
+      "topic": "Geography",
+      "prompt": "In which country are the ancient ruins of Machu Picchu located?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Mexico" },
+        { "id": "b", "label": "B", "text": "Peru" },
+        { "id": "c", "label": "C", "text": "Bolivia" },
+        { "id": "d", "label": "D", "text": "Chile" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "geography-9",
+      "topic": "Geography",
+      "prompt": "Which is the longest mountain range on land?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Himalayas" },
+        { "id": "b", "label": "B", "text": "Rocky Mountains" },
+        { "id": "c", "label": "C", "text": "Andes" },
+        { "id": "d", "label": "D", "text": "Alps" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "geography-10",
+      "topic": "Geography",
+      "prompt": "Which African country has more known pyramids than Egypt?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Sudan" },
+        { "id": "b", "label": "B", "text": "Libya" },
+        { "id": "c", "label": "C", "text": "Ethiopia" },
+        { "id": "d", "label": "D", "text": "Algeria" }
+      ],
+      "correctAnswerId": "a"
+    },
+    {
+      "id": "geography-11",
+      "topic": "Geography",
+      "prompt": "Which European city is famously known as the City of Canals?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Amsterdam" },
+        { "id": "b", "label": "B", "text": "Bruges" },
+        { "id": "c", "label": "C", "text": "Venice" },
+        { "id": "d", "label": "D", "text": "Stockholm" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "geography-12",
+      "topic": "Geography",
+      "prompt": "The Great Barrier Reef lies off the coast of which country?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Indonesia" },
+        { "id": "b", "label": "B", "text": "New Zealand" },
+        { "id": "c", "label": "C", "text": "Australia" },
+        { "id": "d", "label": "D", "text": "Philippines" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "geography-13",
+      "topic": "Geography",
+      "prompt": "What is the capital of Japan?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Kyoto" },
+        { "id": "b", "label": "B", "text": "Osaka" },
+        { "id": "c", "label": "C", "text": "Tokyo" },
+        { "id": "d", "label": "D", "text": "Nagoya" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "geography-14",
+      "topic": "Geography",
+      "prompt": "Which country is generally considered to have the most natural lakes?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Russia" },
+        { "id": "b", "label": "B", "text": "Canada" },
+        { "id": "c", "label": "C", "text": "Finland" },
+        { "id": "d", "label": "D", "text": "United States" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "geography-15",
+      "topic": "Geography",
+      "prompt": "Which strait separates Asia from North America?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Strait of Hormuz" },
+        { "id": "b", "label": "B", "text": "Bering Strait" },
+        { "id": "c", "label": "C", "text": "Strait of Malacca" },
+        { "id": "d", "label": "D", "text": "Strait of Gibraltar" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "geography-16",
+      "topic": "Geography",
+      "prompt": "Which is the largest country by area in South America?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Argentina" },
+        { "id": "b", "label": "B", "text": "Peru" },
+        { "id": "c", "label": "C", "text": "Brazil" },
+        { "id": "d", "label": "D", "text": "Colombia" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "geography-17",
+      "topic": "Geography",
+      "prompt": "Which is the tallest mountain in Africa?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Mount Kenya" },
+        { "id": "b", "label": "B", "text": "Mount Kilimanjaro" },
+        { "id": "c", "label": "C", "text": "Mount Stanley" },
+        { "id": "d", "label": "D", "text": "Mount Meru" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "geography-18",
+      "topic": "Geography",
+      "prompt": "What is the capital of Egypt?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Alexandria" },
+        { "id": "b", "label": "B", "text": "Giza" },
+        { "id": "c", "label": "C", "text": "Cairo" },
+        { "id": "d", "label": "D", "text": "Luxor" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "geography-19",
+      "topic": "Geography",
+      "prompt": "Which large body of water is famous for being one of the saltiest on Earth, allowing swimmers to float effortlessly?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Caspian Sea" },
+        { "id": "b", "label": "B", "text": "Black Sea" },
+        { "id": "c", "label": "C", "text": "Aral Sea" },
+        { "id": "d", "label": "D", "text": "Dead Sea" }
+      ],
+      "correctAnswerId": "d"
+    },
+    {
+      "id": "geography-20",
+      "topic": "Geography",
+      "prompt": "On which continent is the Amazon rainforest primarily located?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Africa" },
+        { "id": "b", "label": "B", "text": "South America" },
+        { "id": "c", "label": "C", "text": "Asia" },
+        { "id": "d", "label": "D", "text": "Oceania" }
+      ],
+      "correctAnswerId": "b"
+    }
+  ]
+}

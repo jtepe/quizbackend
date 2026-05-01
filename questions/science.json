@@ -1,0 +1,245 @@
+{
+  "topic": "Science",
+  "questions": [
+    {
+      "id": "science-1",
+      "topic": "Science",
+      "prompt": "Which planet in our solar system has the most known moons?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Earth" },
+        { "id": "b", "label": "B", "text": "Mars" },
+        { "id": "c", "label": "C", "text": "Jupiter" },
+        { "id": "d", "label": "D", "text": "Saturn" }
+      ],
+      "correctAnswerId": "d"
+    },
+    {
+      "id": "science-2",
+      "topic": "Science",
+      "prompt": "Which gas do plants primarily absorb from the atmosphere during photosynthesis?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Oxygen" },
+        { "id": "b", "label": "B", "text": "Carbon dioxide" },
+        { "id": "c", "label": "C", "text": "Nitrogen" },
+        { "id": "d", "label": "D", "text": "Hydrogen" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "science-3",
+      "topic": "Science",
+      "prompt": "How many bones are in the average adult human body?",
+      "options": [
+        { "id": "a", "label": "A", "text": "186" },
+        { "id": "b", "label": "B", "text": "206" },
+        { "id": "c", "label": "C", "text": "226" },
+        { "id": "d", "label": "D", "text": "246" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "science-4",
+      "topic": "Science",
+      "prompt": "What is the chemical symbol for gold?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Go" },
+        { "id": "b", "label": "B", "text": "Gd" },
+        { "id": "c", "label": "C", "text": "Au" },
+        { "id": "d", "label": "D", "text": "Ag" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "science-5",
+      "topic": "Science",
+      "prompt": "Which naturally occurring substance is the hardest known on Earth?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Quartz" },
+        { "id": "b", "label": "B", "text": "Steel" },
+        { "id": "c", "label": "C", "text": "Diamond" },
+        { "id": "d", "label": "D", "text": "Granite" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "science-6",
+      "topic": "Science",
+      "prompt": "Approximately how fast does light travel in a vacuum?",
+      "options": [
+        { "id": "a", "label": "A", "text": "30,000 km/s" },
+        { "id": "b", "label": "B", "text": "300,000 km/s" },
+        { "id": "c", "label": "C", "text": "3,000,000 km/s" },
+        { "id": "d", "label": "D", "text": "300 km/s" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "science-7",
+      "topic": "Science",
+      "prompt": "Which subatomic particle carries a positive electric charge?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Electron" },
+        { "id": "b", "label": "B", "text": "Neutron" },
+        { "id": "c", "label": "C", "text": "Proton" },
+        { "id": "d", "label": "D", "text": "Photon" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "science-8",
+      "topic": "Science",
+      "prompt": "What is the most abundant gas in Earth's atmosphere?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Oxygen" },
+        { "id": "b", "label": "B", "text": "Carbon dioxide" },
+        { "id": "c", "label": "C", "text": "Nitrogen" },
+        { "id": "d", "label": "D", "text": "Argon" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "science-9",
+      "topic": "Science",
+      "prompt": "Which organ in the human body produces insulin?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Liver" },
+        { "id": "b", "label": "B", "text": "Pancreas" },
+        { "id": "c", "label": "C", "text": "Kidney" },
+        { "id": "d", "label": "D", "text": "Spleen" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "science-10",
+      "topic": "Science",
+      "prompt": "What is the pH value of pure water at room temperature?",
+      "options": [
+        { "id": "a", "label": "A", "text": "0" },
+        { "id": "b", "label": "B", "text": "7" },
+        { "id": "c", "label": "C", "text": "10" },
+        { "id": "d", "label": "D", "text": "14" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "science-11",
+      "topic": "Science",
+      "prompt": "Which scientist formulated the three classical laws of motion?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Albert Einstein" },
+        { "id": "b", "label": "B", "text": "Galileo Galilei" },
+        { "id": "c", "label": "C", "text": "Isaac Newton" },
+        { "id": "d", "label": "D", "text": "Nikola Tesla" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "science-12",
+      "topic": "Science",
+      "prompt": "Which organelle is commonly referred to as the powerhouse of the cell?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Nucleus" },
+        { "id": "b", "label": "B", "text": "Ribosome" },
+        { "id": "c", "label": "C", "text": "Mitochondrion" },
+        { "id": "d", "label": "D", "text": "Golgi apparatus" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "science-13",
+      "topic": "Science",
+      "prompt": "Which element has the atomic number 1?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Helium" },
+        { "id": "b", "label": "B", "text": "Hydrogen" },
+        { "id": "c", "label": "C", "text": "Oxygen" },
+        { "id": "d", "label": "D", "text": "Lithium" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "science-14",
+      "topic": "Science",
+      "prompt": "What shape is the Milky Way galaxy classified as?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Elliptical" },
+        { "id": "b", "label": "B", "text": "Irregular" },
+        { "id": "c", "label": "C", "text": "Spiral" },
+        { "id": "d", "label": "D", "text": "Lenticular" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "science-15",
+      "topic": "Science",
+      "prompt": "Which part of an atom orbits the nucleus?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Proton" },
+        { "id": "b", "label": "B", "text": "Neutron" },
+        { "id": "c", "label": "C", "text": "Quark" },
+        { "id": "d", "label": "D", "text": "Electron" }
+      ],
+      "correctAnswerId": "d"
+    },
+    {
+      "id": "science-16",
+      "topic": "Science",
+      "prompt": "Which human blood type is considered the universal red cell donor?",
+      "options": [
+        { "id": "a", "label": "A", "text": "AB positive" },
+        { "id": "b", "label": "B", "text": "A negative" },
+        { "id": "c", "label": "C", "text": "O negative" },
+        { "id": "d", "label": "D", "text": "B positive" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "science-17",
+      "topic": "Science",
+      "prompt": "What process do plants use to convert sunlight into chemical energy?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Respiration" },
+        { "id": "b", "label": "B", "text": "Transpiration" },
+        { "id": "c", "label": "C", "text": "Photosynthesis" },
+        { "id": "d", "label": "D", "text": "Fermentation" }
+      ],
+      "correctAnswerId": "c"
+    },
+    {
+      "id": "science-18",
+      "topic": "Science",
+      "prompt": "At what temperature does water freeze on the Fahrenheit scale?",
+      "options": [
+        { "id": "a", "label": "A", "text": "0 °F" },
+        { "id": "b", "label": "B", "text": "32 °F" },
+        { "id": "c", "label": "C", "text": "100 °F" },
+        { "id": "d", "label": "D", "text": "212 °F" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "science-19",
+      "topic": "Science",
+      "prompt": "Which planet is commonly known as the Red Planet?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Venus" },
+        { "id": "b", "label": "B", "text": "Mars" },
+        { "id": "c", "label": "C", "text": "Mercury" },
+        { "id": "d", "label": "D", "text": "Jupiter" }
+      ],
+      "correctAnswerId": "b"
+    },
+    {
+      "id": "science-20",
+      "topic": "Science",
+      "prompt": "What is the SI unit of electric current?",
+      "options": [
+        { "id": "a", "label": "A", "text": "Volt" },
+        { "id": "b", "label": "B", "text": "Watt" },
+        { "id": "c", "label": "C", "text": "Ohm" },
+        { "id": "d", "label": "D", "text": "Ampere" }
+      ],
+      "correctAnswerId": "d"
+    }
+  ]
+}
