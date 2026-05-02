@@ -204,8 +204,7 @@ mod tests {
     fn roundtrip_client(json: &str) {
         let parsed: ClientMessage = serde_json::from_str(json).expect("parse");
         let back = serde_json::to_string(&parsed).expect("serialize");
-        let reparsed: ClientMessage = serde_json::from_str(&back).expect("reparse");
-        let _ = reparsed;
+        let _: ClientMessage = serde_json::from_str(&back).expect("reparse");
     }
 
     fn roundtrip_server(json: &str) {
@@ -216,21 +215,37 @@ mod tests {
 
     #[test]
     fn client_message_roundtrips() {
-        roundtrip_client(r#"{"type":"session.hello","requestId":"r1","payload":{"protocolVersion":1,"clientVersion":"x","resumeToken":null}}"#);
-        roundtrip_client(r#"{"type":"player.identify","requestId":"r2","payload":{"displayName":"Mira"}}"#);
+        roundtrip_client(
+            r#"{"type":"session.hello","requestId":"r1","payload":{"protocolVersion":1,"clientVersion":"x","resumeToken":null}}"#,
+        );
+        roundtrip_client(
+            r#"{"type":"player.identify","requestId":"r2","payload":{"displayName":"Mira"}}"#,
+        );
         roundtrip_client(r#"{"type":"lobby.subscribe","requestId":"r3","payload":{}}"#);
-        roundtrip_client(r#"{"type":"game.create","requestId":"r4","payload":{"topic":"Science","questionCount":5}}"#);
+        roundtrip_client(
+            r#"{"type":"game.create","requestId":"r4","payload":{"topic":"Science","questionCount":5}}"#,
+        );
         roundtrip_client(r#"{"type":"game.join","requestId":"r5","payload":{"gameId":"game_1"}}"#);
-        roundtrip_client(r#"{"type":"answer.submit","requestId":"r6","payload":{"gameId":"game_1","questionId":"q1","answerId":"a"}}"#);
-        roundtrip_client(r#"{"type":"question.next.ready","requestId":"r7","payload":{"gameId":"game_1","questionId":"q1"}}"#);
-        roundtrip_client(r#"{"type":"lobby.return","requestId":"r8","payload":{"gameId":"game_1"}}"#);
+        roundtrip_client(
+            r#"{"type":"answer.submit","requestId":"r6","payload":{"gameId":"game_1","questionId":"q1","answerId":"a"}}"#,
+        );
+        roundtrip_client(
+            r#"{"type":"question.next.ready","requestId":"r7","payload":{"gameId":"game_1","questionId":"q1"}}"#,
+        );
+        roundtrip_client(
+            r#"{"type":"lobby.return","requestId":"r8","payload":{"gameId":"game_1"}}"#,
+        );
     }
 
     #[test]
     fn server_message_roundtrips() {
-        roundtrip_server(r#"{"requestId":"r1","type":"session.ready","payload":{"playerId":"player_1"}}"#);
+        roundtrip_server(
+            r#"{"requestId":"r1","type":"session.ready","payload":{"playerId":"player_1"}}"#,
+        );
         roundtrip_server(r#"{"requestId":null,"type":"lobby.snapshot","payload":{"games":[]}}"#);
-        roundtrip_server(r#"{"requestId":null,"type":"error","payload":{"code":"INVALID_TOPIC","message":"x"}}"#);
+        roundtrip_server(
+            r#"{"requestId":null,"type":"error","payload":{"code":"INVALID_TOPIC","message":"x"}}"#,
+        );
     }
 
     #[test]

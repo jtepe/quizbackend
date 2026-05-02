@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 
-use crate::game::{spawn_game, GameCmd, GameInit, GameSummary};
-use crate::ids::{next_game_id, ConnId};
+use crate::game::{GameCmd, GameInit, GameSummary, spawn_game};
+use crate::ids::{ConnId, next_game_id};
 use crate::messages::{ErrorCode, Game, ServerBody, ServerMessage};
 use crate::questions::QuestionRegistry;
 
@@ -86,7 +86,9 @@ impl LobbyActor {
                 self.subscribers.insert(conn_id, out_tx.clone());
                 let _ = out_tx.try_send(ServerMessage {
                     request_id: None,
-                    body: ServerBody::LobbySnapshot { games: self.snapshot_games() },
+                    body: ServerBody::LobbySnapshot {
+                        games: self.snapshot_games(),
+                    },
                 });
             }
             LobbyCmd::Unsubscribe { conn_id } => {
@@ -229,7 +231,9 @@ impl LobbyActor {
         for tx in self.subscribers.values() {
             let _ = tx.try_send(ServerMessage {
                 request_id: None,
-                body: ServerBody::LobbySnapshot { games: games.clone() },
+                body: ServerBody::LobbySnapshot {
+                    games: games.clone(),
+                },
             });
         }
     }
@@ -245,10 +249,15 @@ mod tests {
         Arc::new(QuestionRegistry::load_from_dir(&dir).expect("loads"))
     }
 
-    async fn drain_until<F: FnMut(&ServerBody) -> bool>(rx: &mut mpsc::Receiver<ServerMessage>, mut pred: F) -> ServerMessage {
+    async fn drain_until<F: FnMut(&ServerBody) -> bool>(
+        rx: &mut mpsc::Receiver<ServerMessage>,
+        mut pred: F,
+    ) -> ServerMessage {
         loop {
             let msg = rx.recv().await.expect("channel closed");
-            if pred(&msg.body) { return msg; }
+            if pred(&msg.body) {
+                return msg;
+            }
         }
     }
 
@@ -257,11 +266,23 @@ mod tests {
         let lobby = spawn_lobby(registry());
         let (tx_a, mut rx_a) = mpsc::channel(16);
         let (tx_b, mut rx_b) = mpsc::channel(16);
-        lobby.send(LobbyCmd::Subscribe { conn_id: 1, out_tx: tx_a }).await.unwrap();
+        lobby
+            .send(LobbyCmd::Subscribe {
+                conn_id: 1,
+                out_tx: tx_a,
+            })
+            .await
+            .unwrap();
         let msg = rx_a.recv().await.unwrap();
         assert!(matches!(msg.body, ServerBody::LobbySnapshot { .. }));
         // B has not subscribed; should not receive anything.
-        lobby.send(LobbyCmd::Subscribe { conn_id: 2, out_tx: tx_b }).await.unwrap();
+        lobby
+            .send(LobbyCmd::Subscribe {
+                conn_id: 2,
+                out_tx: tx_b,
+            })
+            .await
+            .unwrap();
         let msg = rx_b.recv().await.unwrap();
         assert!(matches!(msg.body, ServerBody::LobbySnapshot { .. }));
     }
@@ -270,31 +291,47 @@ mod tests {
     async fn create_broadcasts_to_subscribers() {
         let lobby = spawn_lobby(registry());
         let (sub_tx, mut sub_rx) = mpsc::channel(16);
-        lobby.send(LobbyCmd::Subscribe { conn_id: 1, out_tx: sub_tx }).await.unwrap();
+        lobby
+            .send(LobbyCmd::Subscribe {
+                conn_id: 1,
+                out_tx: sub_tx,
+            })
+            .await
+            .unwrap();
         let _ = sub_rx.recv().await; // initial snapshot
 
         let (host_tx, mut host_rx) = mpsc::channel(16);
         let (reply_tx, reply_rx) = tokio::sync::oneshot::channel();
-        lobby.send(LobbyCmd::Create {
-            conn_id: 2,
-            host_player_id: "player_1".into(),
-            host_name: "Mira".into(),
-            host_out_tx: host_tx,
-            topic: "Science".into(),
-            question_count: 3,
-            request_id: Some("req".into()),
-            reply_tx,
-        }).await.unwrap();
+        lobby
+            .send(LobbyCmd::Create {
+                conn_id: 2,
+                host_player_id: "player_1".into(),
+                host_name: "Mira".into(),
+                host_out_tx: host_tx,
+                topic: "Science".into(),
+                question_count: 3,
+                request_id: Some("req".into()),
+                reply_tx,
+            })
+            .await
+            .unwrap();
         let game_cmd = reply_rx.await.unwrap();
         assert!(game_cmd.is_some());
         // Subscriber receives an updated snapshot
-        let msg = drain_until(&mut sub_rx, |b| matches!(b, ServerBody::LobbySnapshot { games } if !games.is_empty())).await;
+        let msg = drain_until(
+            &mut sub_rx,
+            |b| matches!(b, ServerBody::LobbySnapshot { games } if !games.is_empty()),
+        )
+        .await;
         if let ServerBody::LobbySnapshot { games } = msg.body {
             assert_eq!(games.len(), 1);
             assert_eq!(games[0].topic, "Science");
         }
         // Host gets game.created
-        let msg = drain_until(&mut host_rx, |b| matches!(b, ServerBody::GameCreated { .. })).await;
+        let msg = drain_until(&mut host_rx, |b| {
+            matches!(b, ServerBody::GameCreated { .. })
+        })
+        .await;
         assert!(matches!(msg.body, ServerBody::GameCreated { .. }));
     }
 
@@ -302,30 +339,50 @@ mod tests {
     async fn host_left_waiting_removes_and_rebroadcasts() {
         let lobby = spawn_lobby(registry());
         let (sub_tx, mut sub_rx) = mpsc::channel(16);
-        lobby.send(LobbyCmd::Subscribe { conn_id: 1, out_tx: sub_tx }).await.unwrap();
+        lobby
+            .send(LobbyCmd::Subscribe {
+                conn_id: 1,
+                out_tx: sub_tx,
+            })
+            .await
+            .unwrap();
         let _ = sub_rx.recv().await;
 
         let (host_tx, _host_rx) = mpsc::channel(16);
         let (reply_tx, reply_rx) = tokio::sync::oneshot::channel();
-        lobby.send(LobbyCmd::Create {
-            conn_id: 2,
-            host_player_id: "player_1".into(),
-            host_name: "Mira".into(),
-            host_out_tx: host_tx,
-            topic: "Science".into(),
-            question_count: 3,
-            request_id: None,
-            reply_tx,
-        }).await.unwrap();
+        lobby
+            .send(LobbyCmd::Create {
+                conn_id: 2,
+                host_player_id: "player_1".into(),
+                host_name: "Mira".into(),
+                host_out_tx: host_tx,
+                topic: "Science".into(),
+                question_count: 3,
+                request_id: None,
+                reply_tx,
+            })
+            .await
+            .unwrap();
         let _ = reply_rx.await.unwrap();
         // First broadcast (after create) — wait for the snapshot with one game.
-        let msg = drain_until(&mut sub_rx, |b| matches!(b, ServerBody::LobbySnapshot { games } if games.len() == 1)).await;
+        let msg = drain_until(
+            &mut sub_rx,
+            |b| matches!(b, ServerBody::LobbySnapshot { games } if games.len() == 1),
+        )
+        .await;
         let game_id = match msg.body {
             ServerBody::LobbySnapshot { games } => games[0].id.clone(),
             _ => unreachable!(),
         };
-        lobby.send(LobbyCmd::HostLeftWaiting { game_id }).await.unwrap();
-        let msg = drain_until(&mut sub_rx, |b| matches!(b, ServerBody::LobbySnapshot { games } if games.is_empty())).await;
+        lobby
+            .send(LobbyCmd::HostLeftWaiting { game_id })
+            .await
+            .unwrap();
+        let msg = drain_until(
+            &mut sub_rx,
+            |b| matches!(b, ServerBody::LobbySnapshot { games } if games.is_empty()),
+        )
+        .await;
         assert!(matches!(msg.body, ServerBody::LobbySnapshot { .. }));
     }
 
@@ -334,16 +391,19 @@ mod tests {
         let lobby = spawn_lobby(registry());
         let (host_tx, mut host_rx) = mpsc::channel(16);
         let (reply_tx, reply_rx) = tokio::sync::oneshot::channel();
-        lobby.send(LobbyCmd::Create {
-            conn_id: 1,
-            host_player_id: "player_1".into(),
-            host_name: "Mira".into(),
-            host_out_tx: host_tx,
-            topic: "Sherlock Holmes".into(),
-            question_count: 3,
-            request_id: Some("req".into()),
-            reply_tx,
-        }).await.unwrap();
+        lobby
+            .send(LobbyCmd::Create {
+                conn_id: 1,
+                host_player_id: "player_1".into(),
+                host_name: "Mira".into(),
+                host_out_tx: host_tx,
+                topic: "Sherlock Holmes".into(),
+                question_count: 3,
+                request_id: Some("req".into()),
+                reply_tx,
+            })
+            .await
+            .unwrap();
         let reply = reply_rx.await.unwrap();
         assert!(reply.is_none());
         let msg = host_rx.recv().await.unwrap();
@@ -359,16 +419,19 @@ mod tests {
         let lobby = spawn_lobby(registry());
         let (host_tx, mut host_rx) = mpsc::channel(16);
         let (reply_tx, reply_rx) = tokio::sync::oneshot::channel();
-        lobby.send(LobbyCmd::Create {
-            conn_id: 1,
-            host_player_id: "player_1".into(),
-            host_name: "Mira".into(),
-            host_out_tx: host_tx,
-            topic: "Science".into(),
-            question_count: 9999,
-            request_id: Some("req".into()),
-            reply_tx,
-        }).await.unwrap();
+        lobby
+            .send(LobbyCmd::Create {
+                conn_id: 1,
+                host_player_id: "player_1".into(),
+                host_name: "Mira".into(),
+                host_out_tx: host_tx,
+                topic: "Science".into(),
+                question_count: 9999,
+                request_id: Some("req".into()),
+                reply_tx,
+            })
+            .await
+            .unwrap();
         let reply = reply_rx.await.unwrap();
         assert!(reply.is_none());
         let msg = host_rx.recv().await.unwrap();

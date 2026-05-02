@@ -5,7 +5,7 @@ use tokio_tungstenite::tungstenite::Message as WsMessage;
 use tracing::{debug, info, warn};
 
 use crate::game::GameCmd;
-use crate::ids::{next_conn_id, next_player_id, ConnId};
+use crate::ids::{ConnId, next_conn_id, next_player_id};
 use crate::lobby::LobbyCmd;
 use crate::messages::{ClientBody, ClientMessage, ErrorCode, ServerBody, ServerMessage};
 
@@ -74,7 +74,10 @@ pub async fn handle_connection(stream: TcpStream, lobby_tx: mpsc::Sender<LobbyCm
         let text = match frame {
             WsMessage::Text(t) => t.to_string(),
             WsMessage::Close(_) => break,
-            WsMessage::Ping(_) | WsMessage::Pong(_) | WsMessage::Binary(_) | WsMessage::Frame(_) => continue,
+            WsMessage::Ping(_)
+            | WsMessage::Pong(_)
+            | WsMessage::Binary(_)
+            | WsMessage::Frame(_) => continue,
         };
         let msg: ClientMessage = match serde_json::from_str(&text) {
             Ok(m) => m,
@@ -94,7 +97,12 @@ pub async fn handle_connection(stream: TcpStream, lobby_tx: mpsc::Sender<LobbyCm
         };
         let request_id = Some(msg.request_id.clone());
         match (state.clone(), msg.body) {
-            (SessionState::Greeting, ClientBody::SessionHello { protocol_version, .. }) => {
+            (
+                SessionState::Greeting,
+                ClientBody::SessionHello {
+                    protocol_version, ..
+                },
+            ) => {
                 if protocol_version != PROTOCOL_VERSION {
                     let _ = out_tx
                         .send(ServerMessage {
@@ -141,7 +149,13 @@ pub async fn handle_connection(stream: TcpStream, lobby_tx: mpsc::Sender<LobbyCm
                     })
                     .await;
             }
-            (SessionState::Idle, ClientBody::GameCreate { topic, question_count }) => {
+            (
+                SessionState::Idle,
+                ClientBody::GameCreate {
+                    topic,
+                    question_count,
+                },
+            ) => {
                 let pid = match &player_id {
                     Some(p) => p.clone(),
                     None => continue,
@@ -189,7 +203,14 @@ pub async fn handle_connection(stream: TcpStream, lobby_tx: mpsc::Sender<LobbyCm
                     state = SessionState::InGame;
                 }
             }
-            (SessionState::InGame, ClientBody::AnswerSubmit { game_id: _, question_id, answer_id }) => {
+            (
+                SessionState::InGame,
+                ClientBody::AnswerSubmit {
+                    game_id: _,
+                    question_id,
+                    answer_id,
+                },
+            ) => {
                 if let (Some(tx), Some(pid)) = (&current_game, &player_id) {
                     let _ = tx
                         .send(GameCmd::Submit {
@@ -201,7 +222,13 @@ pub async fn handle_connection(stream: TcpStream, lobby_tx: mpsc::Sender<LobbyCm
                         .await;
                 }
             }
-            (SessionState::InGame, ClientBody::QuestionNextReady { game_id: _, question_id }) => {
+            (
+                SessionState::InGame,
+                ClientBody::QuestionNextReady {
+                    game_id: _,
+                    question_id,
+                },
+            ) => {
                 if let (Some(tx), Some(pid)) = (&current_game, &player_id) {
                     let _ = tx
                         .send(GameCmd::NextReady {
@@ -217,7 +244,9 @@ pub async fn handle_connection(stream: TcpStream, lobby_tx: mpsc::Sender<LobbyCm
                     let _ = tx.send(GameCmd::LobbyReturn).await;
                     let _ = pid;
                     let _ = lobby_tx
-                        .send(LobbyCmd::GameFinished { game_id: game_id.clone() })
+                        .send(LobbyCmd::GameFinished {
+                            game_id: game_id.clone(),
+                        })
                         .await;
                 }
                 current_game = None;
@@ -242,12 +271,18 @@ pub async fn handle_connection(stream: TcpStream, lobby_tx: mpsc::Sender<LobbyCm
     let _ = lobby_tx.send(LobbyCmd::Unsubscribe { conn_id }).await;
     if let Some(tx) = current_game {
         if let Some(pid) = &player_id {
-            let _ = tx.send(GameCmd::Disconnect { player_id: pid.clone() }).await;
+            let _ = tx
+                .send(GameCmd::Disconnect {
+                    player_id: pid.clone(),
+                })
+                .await;
         }
     }
     if let Some(gid) = current_game_id {
         // Best-effort: in case we were the host of a still-waiting game, ask lobby to clean up.
-        let _ = lobby_tx.send(LobbyCmd::HostLeftWaiting { game_id: gid }).await;
+        let _ = lobby_tx
+            .send(LobbyCmd::HostLeftWaiting { game_id: gid })
+            .await;
     }
     drop(out_tx);
     let _ = writer.await;
