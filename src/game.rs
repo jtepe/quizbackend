@@ -113,7 +113,11 @@ pub fn spawn_game(init: GameInit) -> (mpsc::Sender<GameCmd>, GameSummary) {
         created_at: init.created_at,
     };
 
-    let p1 = PlayerSlot::new(init.host_player_id.clone(), init.host_name.clone(), init.host_out_tx.clone());
+    let p1 = PlayerSlot::new(
+        init.host_player_id.clone(),
+        init.host_name.clone(),
+        init.host_out_tx.clone(),
+    );
     let host_request_id = init.host_request_id.clone();
 
     let actor = GameActor {
@@ -133,10 +137,13 @@ pub fn spawn_game(init: GameInit) -> (mpsc::Sender<GameCmd>, GameSummary) {
         let mut actor = actor;
         // Send game.created to host
         let snapshot = actor.snapshot();
-        actor.send_to(&actor.p1.id.clone(), ServerMessage {
-            request_id: host_request_id,
-            body: ServerBody::GameCreated { game: snapshot },
-        });
+        actor.send_to(
+            &actor.p1.id.clone(),
+            ServerMessage {
+                request_id: host_request_id,
+                body: ServerBody::GameCreated { game: snapshot },
+            },
+        );
         actor.run().await;
     });
 
@@ -191,22 +198,32 @@ impl GameActor {
 
     fn players_full_payload(&self, reveal_correct: Option<&str>) -> Vec<Player> {
         let mut out = Vec::with_capacity(2);
-        let p1_correct = reveal_correct
-            .map(|cid| self.p1.answer.as_deref() == Some(cid));
+        let p1_correct = reveal_correct.map(|cid| self.p1.answer.as_deref() == Some(cid));
         out.push(self.p1.to_player(p1_correct));
         if let Some(p2) = &self.p2 {
-            let p2_correct = reveal_correct
-                .map(|cid| p2.answer.as_deref() == Some(cid));
+            let p2_correct = reveal_correct.map(|cid| p2.answer.as_deref() == Some(cid));
             out.push(p2.to_player(p2_correct));
         }
         out
     }
 
-    fn send_error(&self, player_id: &str, request_id: Option<String>, code: ErrorCode, message: &str) {
-        self.send_to(player_id, ServerMessage {
-            request_id,
-            body: ServerBody::Error { code, message: message.to_string() },
-        });
+    fn send_error(
+        &self,
+        player_id: &str,
+        request_id: Option<String>,
+        code: ErrorCode,
+        message: &str,
+    ) {
+        self.send_to(
+            player_id,
+            ServerMessage {
+                request_id,
+                body: ServerBody::Error {
+                    code,
+                    message: message.to_string(),
+                },
+            },
+        );
     }
 
     async fn run(&mut self) {
@@ -230,7 +247,9 @@ impl GameActor {
                 }
             }
 
-            if !self.p1.is_connected() && self.p2.as_ref().map(|p| !p.is_connected()).unwrap_or(true) {
+            if !self.p1.is_connected()
+                && self.p2.as_ref().map(|p| !p.is_connected()).unwrap_or(true)
+            {
                 break;
             }
         }
@@ -238,11 +257,25 @@ impl GameActor {
 
     fn handle_cmd(&mut self, cmd: GameCmd) {
         match cmd {
-            GameCmd::Join { player_id, name, out_tx, request_id } => self.handle_join(player_id, name, out_tx, request_id),
-            GameCmd::Submit { player_id, question_id, answer_id, request_id } => {
+            GameCmd::Join {
+                player_id,
+                name,
+                out_tx,
+                request_id,
+            } => self.handle_join(player_id, name, out_tx, request_id),
+            GameCmd::Submit {
+                player_id,
+                question_id,
+                answer_id,
+                request_id,
+            } => {
                 self.handle_submit(player_id, question_id, answer_id, request_id);
             }
-            GameCmd::NextReady { player_id, question_id, request_id } => {
+            GameCmd::NextReady {
+                player_id,
+                question_id,
+                request_id,
+            } => {
                 self.handle_next_ready(player_id, question_id, request_id);
             }
             GameCmd::LobbyReturn => {
@@ -275,10 +308,13 @@ impl GameActor {
 
         // game.joined to joiner
         let snapshot = self.snapshot();
-        self.send_to(&player_id, ServerMessage {
-            request_id,
-            body: ServerBody::GameJoined { game: snapshot },
-        });
+        self.send_to(
+            &player_id,
+            ServerMessage {
+                request_id,
+                body: ServerBody::GameJoined { game: snapshot },
+            },
+        );
 
         // game.player_joined broadcast
         self.broadcast(ServerMessage {
@@ -341,38 +377,67 @@ impl GameActor {
         request_id: Option<String>,
     ) {
         if self.phase != GamePhase::QuestionActive {
-            self.send_error(&player_id, request_id, ErrorCode::QuestionTimeout, "Question is no longer accepting answers.");
+            self.send_error(
+                &player_id,
+                request_id,
+                ErrorCode::QuestionTimeout,
+                "Question is no longer accepting answers.",
+            );
             return;
         }
         let current_qid = match self.current_question() {
             Some(q) => q.question.id.clone(),
             None => {
-                self.send_error(&player_id, request_id, ErrorCode::InvalidGamePhase, "No active question.");
+                self.send_error(
+                    &player_id,
+                    request_id,
+                    ErrorCode::InvalidGamePhase,
+                    "No active question.",
+                );
                 return;
             }
         };
         if current_qid != question_id {
-            self.send_error(&player_id, request_id, ErrorCode::InvalidGamePhase, "Stale questionId.");
+            self.send_error(
+                &player_id,
+                request_id,
+                ErrorCode::InvalidGamePhase,
+                "Stale questionId.",
+            );
             return;
         }
 
         let already_locked = if self.p1.id == player_id {
             self.p1.answer.is_some()
         } else if let Some(p2) = &self.p2 {
-            if p2.id == player_id { p2.answer.is_some() } else { false }
+            if p2.id == player_id {
+                p2.answer.is_some()
+            } else {
+                false
+            }
         } else {
             false
         };
 
         if already_locked {
-            self.send_error(&player_id, request_id.clone(), ErrorCode::AnswerAlreadyLocked, "Answer already locked.");
+            self.send_error(
+                &player_id,
+                request_id.clone(),
+                ErrorCode::AnswerAlreadyLocked,
+                "Answer already locked.",
+            );
             return;
         }
 
-        let is_member = self.p1.id == player_id
-            || self.p2.as_ref().map(|p| p.id == player_id).unwrap_or(false);
+        let is_member =
+            self.p1.id == player_id || self.p2.as_ref().map(|p| p.id == player_id).unwrap_or(false);
         if !is_member {
-            self.send_error(&player_id, request_id, ErrorCode::NotAGameMember, "Not a member of this game.");
+            self.send_error(
+                &player_id,
+                request_id,
+                ErrorCode::NotAGameMember,
+                "Not a member of this game.",
+            );
             return;
         }
 
@@ -383,15 +448,18 @@ impl GameActor {
         }
 
         // answer.accepted to submitter
-        self.send_to(&player_id, ServerMessage {
-            request_id,
-            body: ServerBody::AnswerAccepted(Answer {
-                game_id: self.id.clone(),
-                question_id: question_id.clone(),
-                player_id: player_id.clone(),
-                locked: Some(true),
-            }),
-        });
+        self.send_to(
+            &player_id,
+            ServerMessage {
+                request_id,
+                body: ServerBody::AnswerAccepted(Answer {
+                    game_id: self.id.clone(),
+                    question_id: question_id.clone(),
+                    player_id: player_id.clone(),
+                    locked: Some(true),
+                }),
+            },
+        );
         // answer.locked broadcast
         self.broadcast(ServerMessage {
             request_id: None,
@@ -470,7 +538,12 @@ impl GameActor {
         request_id: Option<String>,
     ) {
         if self.phase != GamePhase::AnswerReveal && self.phase != GamePhase::WaitingForNext {
-            self.send_error(&player_id, request_id, ErrorCode::InvalidGamePhase, "Not in reveal phase.");
+            self.send_error(
+                &player_id,
+                request_id,
+                ErrorCode::InvalidGamePhase,
+                "Not in reveal phase.",
+            );
             return;
         }
         let current_qid = match self.current_question() {
@@ -478,7 +551,12 @@ impl GameActor {
             None => return,
         };
         if current_qid != question_id {
-            self.send_error(&player_id, request_id, ErrorCode::InvalidGamePhase, "Stale questionId.");
+            self.send_error(
+                &player_id,
+                request_id,
+                ErrorCode::InvalidGamePhase,
+                "Stale questionId.",
+            );
             return;
         }
 
@@ -618,12 +696,15 @@ impl GameActor {
             // If neither answered, treat as time_expired; if at least one answered, both_answered.
             let any_answer = self.p1.answer.is_some()
                 || self.p2.as_ref().and_then(|p| p.answer.as_ref()).is_some();
-            let reason = if any_answer { RevealReason::BothAnswered } else { RevealReason::TimeExpired };
+            let reason = if any_answer {
+                RevealReason::BothAnswered
+            } else {
+                RevealReason::TimeExpired
+            };
             self.reveal(reason);
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -637,15 +718,26 @@ mod tests {
                 topic: "Test".into(),
                 prompt: "?".into(),
                 options: vec![
-                    QuestionOption { id: "a".into(), label: "A".into(), text: "A".into() },
-                    QuestionOption { id: "b".into(), label: "B".into(), text: "B".into() },
+                    QuestionOption {
+                        id: "a".into(),
+                        label: "A".into(),
+                        text: "A".into(),
+                    },
+                    QuestionOption {
+                        id: "b".into(),
+                        label: "B".into(),
+                        text: "B".into(),
+                    },
                 ],
             },
             correct_answer_id: correct.into(),
         }
     }
 
-    async fn drain_until<F: FnMut(&ServerBody) -> bool>(rx: &mut mpsc::Receiver<ServerMessage>, mut pred: F) -> ServerMessage {
+    async fn drain_until<F: FnMut(&ServerBody) -> bool>(
+        rx: &mut mpsc::Receiver<ServerMessage>,
+        mut pred: F,
+    ) -> ServerMessage {
         loop {
             let msg = rx.recv().await.expect("channel closed");
             if pred(&msg.body) {
@@ -654,7 +746,15 @@ mod tests {
         }
     }
 
-    fn setup(qs: Vec<StoredQuestion>) -> (mpsc::Sender<GameCmd>, mpsc::Receiver<ServerMessage>, mpsc::Receiver<ServerMessage>, String, String) {
+    fn setup(
+        qs: Vec<StoredQuestion>,
+    ) -> (
+        mpsc::Sender<GameCmd>,
+        mpsc::Receiver<ServerMessage>,
+        mpsc::Receiver<ServerMessage>,
+        String,
+        String,
+    ) {
         let (host_tx, host_rx) = mpsc::channel(64);
         let (joiner_tx, joiner_rx) = mpsc::channel(64);
         let p1_id = "player_1".to_string();
@@ -674,12 +774,15 @@ mod tests {
         let cmd_tx_clone = cmd_tx.clone();
         // Send Join synchronously via blocking_send replacement: just send asynchronously below
         tokio::spawn(async move {
-            cmd_tx_clone.send(GameCmd::Join {
-                player_id: p2,
-                name: "Jonah".into(),
-                out_tx: joiner_tx,
-                request_id: Some("req_join".into()),
-            }).await.ok();
+            cmd_tx_clone
+                .send(GameCmd::Join {
+                    player_id: p2,
+                    name: "Jonah".into(),
+                    out_tx: joiner_tx,
+                    request_id: Some("req_join".into()),
+                })
+                .await
+                .ok();
         });
         (cmd_tx, host_rx, joiner_rx, p1_id, p2_id)
     }
@@ -688,15 +791,42 @@ mod tests {
     async fn both_correct_scores_plus_one() {
         let qs = vec![make_q("q1", "a"), make_q("q2", "b")];
         let (cmd_tx, mut hrx, mut jrx, p1, p2) = setup(qs);
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        let _ = drain_until(&mut jrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        let _ = drain_until(&mut jrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
 
-        cmd_tx.send(GameCmd::Submit { player_id: p1.clone(), question_id: "q1".into(), answer_id: "a".into(), request_id: None }).await.unwrap();
-        cmd_tx.send(GameCmd::Submit { player_id: p2.clone(), question_id: "q1".into(), answer_id: "a".into(), request_id: None }).await.unwrap();
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p1.clone(),
+                question_id: "q1".into(),
+                answer_id: "a".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p2.clone(),
+                question_id: "q1".into(),
+                answer_id: "a".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
 
-        let msg = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionRevealed { .. })).await;
+        let msg = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionRevealed { .. })
+        })
+        .await;
         match msg.body {
-            ServerBody::QuestionRevealed { reason, players, .. } => {
+            ServerBody::QuestionRevealed {
+                reason, players, ..
+            } => {
                 assert!(matches!(reason, RevealReason::BothAnswered));
                 assert_eq!(players[0].score, Some(1));
                 assert_eq!(players[1].score, Some(1));
@@ -711,11 +841,36 @@ mod tests {
     async fn one_correct_one_wrong() {
         let qs = vec![make_q("q1", "a")];
         let (cmd_tx, mut hrx, mut jrx, p1, p2) = setup(qs);
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        let _ = drain_until(&mut jrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        cmd_tx.send(GameCmd::Submit { player_id: p1, question_id: "q1".into(), answer_id: "a".into(), request_id: None }).await.unwrap();
-        cmd_tx.send(GameCmd::Submit { player_id: p2, question_id: "q1".into(), answer_id: "b".into(), request_id: None }).await.unwrap();
-        let msg = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionRevealed { .. })).await;
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        let _ = drain_until(&mut jrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p1,
+                question_id: "q1".into(),
+                answer_id: "a".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p2,
+                question_id: "q1".into(),
+                answer_id: "b".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        let msg = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionRevealed { .. })
+        })
+        .await;
         if let ServerBody::QuestionRevealed { players, .. } = msg.body {
             assert_eq!(players[0].score, Some(1));
             assert_eq!(players[1].score, Some(0));
@@ -727,13 +882,33 @@ mod tests {
         tokio::time::pause();
         let qs = vec![make_q("q1", "a")];
         let (cmd_tx, mut hrx, mut jrx, p1, _p2) = setup(qs);
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        let _ = drain_until(&mut jrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        cmd_tx.send(GameCmd::Submit { player_id: p1, question_id: "q1".into(), answer_id: "a".into(), request_id: None }).await.unwrap();
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        let _ = drain_until(&mut jrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p1,
+                question_id: "q1".into(),
+                answer_id: "a".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
         // Drain accepted/locked
         tokio::time::advance(QUESTION_DURATION + Duration::from_secs(1)).await;
-        let msg = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionRevealed { .. })).await;
-        if let ServerBody::QuestionRevealed { reason, players, .. } = msg.body {
+        let msg = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionRevealed { .. })
+        })
+        .await;
+        if let ServerBody::QuestionRevealed {
+            reason, players, ..
+        } = msg.body
+        {
             assert!(matches!(reason, RevealReason::TimeExpired));
             assert_eq!(players[0].did_answer_correctly, Some(true));
             assert_eq!(players[1].did_answer_correctly, Some(false));
@@ -744,11 +919,36 @@ mod tests {
     async fn both_wrong_zero_scores() {
         let qs = vec![make_q("q1", "a")];
         let (cmd_tx, mut hrx, mut jrx, p1, p2) = setup(qs);
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        let _ = drain_until(&mut jrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        cmd_tx.send(GameCmd::Submit { player_id: p1, question_id: "q1".into(), answer_id: "b".into(), request_id: None }).await.unwrap();
-        cmd_tx.send(GameCmd::Submit { player_id: p2, question_id: "q1".into(), answer_id: "b".into(), request_id: None }).await.unwrap();
-        let msg = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionRevealed { .. })).await;
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        let _ = drain_until(&mut jrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p1,
+                question_id: "q1".into(),
+                answer_id: "b".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p2,
+                question_id: "q1".into(),
+                answer_id: "b".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        let msg = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionRevealed { .. })
+        })
+        .await;
         if let ServerBody::QuestionRevealed { players, .. } = msg.body {
             assert_eq!(players[0].score, Some(0));
             assert_eq!(players[1].score, Some(0));
@@ -759,11 +959,31 @@ mod tests {
     async fn disconnect_during_active_with_other_answer_reveals() {
         let qs = vec![make_q("q1", "a")];
         let (cmd_tx, mut hrx, mut jrx, p1, p2) = setup(qs);
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        let _ = drain_until(&mut jrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        cmd_tx.send(GameCmd::Submit { player_id: p1.clone(), question_id: "q1".into(), answer_id: "a".into(), request_id: None }).await.unwrap();
-        cmd_tx.send(GameCmd::Disconnect { player_id: p2 }).await.unwrap();
-        let msg = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionRevealed { .. })).await;
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        let _ = drain_until(&mut jrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p1.clone(),
+                question_id: "q1".into(),
+                answer_id: "a".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        cmd_tx
+            .send(GameCmd::Disconnect { player_id: p2 })
+            .await
+            .unwrap();
+        let msg = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionRevealed { .. })
+        })
+        .await;
         if let ServerBody::QuestionRevealed { players, .. } = msg.body {
             assert_eq!(players[0].score, Some(1));
             assert_eq!(players[1].score, Some(0));
@@ -774,29 +994,111 @@ mod tests {
     async fn disconnect_during_reveal_advances_after_other_ready() {
         let qs = vec![make_q("q1", "a"), make_q("q2", "a")];
         let (cmd_tx, mut hrx, mut jrx, p1, p2) = setup(qs);
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        let _ = drain_until(&mut jrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        cmd_tx.send(GameCmd::Submit { player_id: p1.clone(), question_id: "q1".into(), answer_id: "a".into(), request_id: None }).await.unwrap();
-        cmd_tx.send(GameCmd::Submit { player_id: p2.clone(), question_id: "q1".into(), answer_id: "a".into(), request_id: None }).await.unwrap();
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionRevealed { .. })).await;
-        cmd_tx.send(GameCmd::Disconnect { player_id: p2 }).await.unwrap();
-        cmd_tx.send(GameCmd::NextReady { player_id: p1, question_id: "q1".into(), request_id: None }).await.unwrap();
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        let _ = drain_until(&mut jrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p1.clone(),
+                question_id: "q1".into(),
+                answer_id: "a".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p2.clone(),
+                question_id: "q1".into(),
+                answer_id: "a".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionRevealed { .. })
+        })
+        .await;
+        cmd_tx
+            .send(GameCmd::Disconnect { player_id: p2 })
+            .await
+            .unwrap();
+        cmd_tx
+            .send(GameCmd::NextReady {
+                player_id: p1,
+                question_id: "q1".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
     }
 
     #[tokio::test]
     async fn last_question_emits_results_with_winner() {
         let qs = vec![make_q("q1", "a")];
         let (cmd_tx, mut hrx, mut jrx, p1, p2) = setup(qs);
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        let _ = drain_until(&mut jrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        cmd_tx.send(GameCmd::Submit { player_id: p1.clone(), question_id: "q1".into(), answer_id: "a".into(), request_id: None }).await.unwrap();
-        cmd_tx.send(GameCmd::Submit { player_id: p2.clone(), question_id: "q1".into(), answer_id: "b".into(), request_id: None }).await.unwrap();
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionRevealed { .. })).await;
-        cmd_tx.send(GameCmd::NextReady { player_id: p1.clone(), question_id: "q1".into(), request_id: None }).await.unwrap();
-        cmd_tx.send(GameCmd::NextReady { player_id: p2.clone(), question_id: "q1".into(), request_id: None }).await.unwrap();
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        let _ = drain_until(&mut jrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p1.clone(),
+                question_id: "q1".into(),
+                answer_id: "a".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p2.clone(),
+                question_id: "q1".into(),
+                answer_id: "b".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionRevealed { .. })
+        })
+        .await;
+        cmd_tx
+            .send(GameCmd::NextReady {
+                player_id: p1.clone(),
+                question_id: "q1".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        cmd_tx
+            .send(GameCmd::NextReady {
+                player_id: p2.clone(),
+                question_id: "q1".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
         let msg = drain_until(&mut hrx, |b| matches!(b, ServerBody::GameResults { .. })).await;
-        if let ServerBody::GameResults { winner_player_id, winner_label, .. } = msg.body {
+        if let ServerBody::GameResults {
+            winner_player_id,
+            winner_label,
+            ..
+        } = msg.body
+        {
             assert_eq!(winner_player_id.as_deref(), Some(p1.as_str()));
             assert_eq!(winner_label, "Mira wins");
         }
@@ -806,15 +1108,59 @@ mod tests {
     async fn results_tie_has_null_winner() {
         let qs = vec![make_q("q1", "a")];
         let (cmd_tx, mut hrx, mut jrx, p1, p2) = setup(qs);
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        let _ = drain_until(&mut jrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        cmd_tx.send(GameCmd::Submit { player_id: p1.clone(), question_id: "q1".into(), answer_id: "b".into(), request_id: None }).await.unwrap();
-        cmd_tx.send(GameCmd::Submit { player_id: p2.clone(), question_id: "q1".into(), answer_id: "b".into(), request_id: None }).await.unwrap();
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionRevealed { .. })).await;
-        cmd_tx.send(GameCmd::NextReady { player_id: p1, question_id: "q1".into(), request_id: None }).await.unwrap();
-        cmd_tx.send(GameCmd::NextReady { player_id: p2, question_id: "q1".into(), request_id: None }).await.unwrap();
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        let _ = drain_until(&mut jrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p1.clone(),
+                question_id: "q1".into(),
+                answer_id: "b".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p2.clone(),
+                question_id: "q1".into(),
+                answer_id: "b".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionRevealed { .. })
+        })
+        .await;
+        cmd_tx
+            .send(GameCmd::NextReady {
+                player_id: p1,
+                question_id: "q1".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        cmd_tx
+            .send(GameCmd::NextReady {
+                player_id: p2,
+                question_id: "q1".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
         let msg = drain_until(&mut hrx, |b| matches!(b, ServerBody::GameResults { .. })).await;
-        if let ServerBody::GameResults { winner_player_id, winner_label, .. } = msg.body {
+        if let ServerBody::GameResults {
+            winner_player_id,
+            winner_label,
+            ..
+        } = msg.body
+        {
             assert!(winner_player_id.is_none());
             assert_eq!(winner_label, "Draw game");
         }
@@ -825,11 +1171,28 @@ mod tests {
         tokio::time::pause();
         let qs = vec![make_q("q1", "a"), make_q("q2", "a")];
         let (cmd_tx, mut hrx, mut jrx, p1, _p2) = setup(qs);
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        let _ = drain_until(&mut jrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        let _ = drain_until(&mut jrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
         tokio::time::advance(QUESTION_DURATION + Duration::from_secs(1)).await;
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionRevealed { .. })).await;
-        cmd_tx.send(GameCmd::Submit { player_id: p1, question_id: "q1".into(), answer_id: "a".into(), request_id: Some("late".into()) }).await.unwrap();
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionRevealed { .. })
+        })
+        .await;
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p1,
+                question_id: "q1".into(),
+                answer_id: "a".into(),
+                request_id: Some("late".into()),
+            })
+            .await
+            .unwrap();
         let msg = drain_until(&mut hrx, |b| matches!(b, ServerBody::Error { .. })).await;
         if let ServerBody::Error { code, .. } = msg.body {
             assert!(matches!(code, ErrorCode::QuestionTimeout));
@@ -840,10 +1203,32 @@ mod tests {
     async fn double_submit_returns_error() {
         let qs = vec![make_q("q1", "a")];
         let (cmd_tx, mut hrx, mut jrx, p1, _p2) = setup(qs);
-        let _ = drain_until(&mut hrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        let _ = drain_until(&mut jrx, |b| matches!(b, ServerBody::QuestionStarted { .. })).await;
-        cmd_tx.send(GameCmd::Submit { player_id: p1.clone(), question_id: "q1".into(), answer_id: "a".into(), request_id: None }).await.unwrap();
-        cmd_tx.send(GameCmd::Submit { player_id: p1, question_id: "q1".into(), answer_id: "b".into(), request_id: Some("dup".into()) }).await.unwrap();
+        let _ = drain_until(&mut hrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        let _ = drain_until(&mut jrx, |b| {
+            matches!(b, ServerBody::QuestionStarted { .. })
+        })
+        .await;
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p1.clone(),
+                question_id: "q1".into(),
+                answer_id: "a".into(),
+                request_id: None,
+            })
+            .await
+            .unwrap();
+        cmd_tx
+            .send(GameCmd::Submit {
+                player_id: p1,
+                question_id: "q1".into(),
+                answer_id: "b".into(),
+                request_id: Some("dup".into()),
+            })
+            .await
+            .unwrap();
         let msg = drain_until(&mut hrx, |b| matches!(b, ServerBody::Error { .. })).await;
         if let ServerBody::Error { code, .. } = msg.body {
             assert!(matches!(code, ErrorCode::AnswerAlreadyLocked));

@@ -33,16 +33,16 @@ pub struct QuestionRegistry {
 impl QuestionRegistry {
     pub fn load_from_dir(dir: &Path) -> Result<Self, String> {
         let mut pools: HashMap<String, Vec<StoredQuestion>> = HashMap::new();
-        let entries = std::fs::read_dir(dir)
-            .map_err(|e| format!("read_dir {}: {e}", dir.display()))?;
+        let entries =
+            std::fs::read_dir(dir).map_err(|e| format!("read_dir {}: {e}", dir.display()))?;
         for entry in entries {
             let entry = entry.map_err(|e| format!("dir entry: {e}"))?;
             let path = entry.path();
             if path.extension().and_then(|s| s.to_str()) != Some("json") {
                 continue;
             }
-            let bytes = std::fs::read(&path)
-                .map_err(|e| format!("read {}: {e}", path.display()))?;
+            let bytes =
+                std::fs::read(&path).map_err(|e| format!("read {}: {e}", path.display()))?;
             let raw: RawFile = serde_json::from_slice(&bytes)
                 .map_err(|e| format!("parse {}: {e}", path.display()))?;
             let stored: Vec<StoredQuestion> = raw
@@ -73,10 +73,7 @@ impl QuestionRegistry {
             return None;
         }
         let mut rng = rand::rng();
-        let mut chosen: Vec<StoredQuestion> = pool
-            .sample(&mut rng, n)
-            .cloned()
-            .collect();
+        let mut chosen: Vec<StoredQuestion> = pool.sample(&mut rng, n).cloned().collect();
         chosen.shuffle(&mut rng);
         Some(chosen)
     }
